@@ -1,13 +1,54 @@
 import { View, Image } from "react-native";
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
 export default function EmojiSticker({imageSize, stickerSource}){
+    const scaledImage = useSharedValue(imageSize)
+    const doubleTap = Gesture.Tap()
+        .numberOfTaps(2)
+        .onStart(() =>{
+            if(scaledImage.value != imageSize * 2) {
+                scaledImage.value = scaledImage.value * 2
+            }
+        })
+    const imageStyle = useAnimatedStyle(()=> {
+        return {
+            width: withSpring(scaledImage.value),
+            height: withSpring(scaledImage.value),
+        }
+    })
+    const translateX = useSharedValue(0)
+    const translateY = useSharedValue(0)
+
+    const drag = Gesture.Pan()
+        .onChange((event) => {
+            translateX.value += event.changeX
+            translateY.value += event.changeY
+        })
+    const containerStyle = useAnimatedStyle(() => {
+        return{
+            transform:[
+                {
+                    translateX: translateX.value
+                },
+                {
+                    translateY: translateY.value
+                }
+            ]
+        }
+    })
+
     return(
-        <View style={{top: -350}}>
-            <Image
-                source={stickerSource}
-                resizeMode="container"
-                style={{width: imageSize, height:imageSize}}
-            />
-        </View>
+        <GestureDetector gesture={drag}>
+            <Animated.View style={[containerStyle, {top: -350}]}>
+                <GestureDetector gesture={doubleTap}>
+                    <Animated.Image
+                        source={stickerSource}
+                        resizeMode="container"
+                        style={[imageStyle, {width: imageSize, height:imageSize}]}
+                    />
+                </GestureDetector>
+            </Animated.View>
+        </GestureDetector>
     )
 }
