@@ -12,6 +12,8 @@ const PlaceholderImage = require('./assets/images/background-image.png');
 
 export default function App() {
   const [selectedImage, setSelectedImage] = useState(null)
+  const [showAppOptions, setShowAppOptions] = useState(false)
+
   const imagePickerAsync = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing:true,
@@ -20,6 +22,7 @@ export default function App() {
 
     if(!result.canceled) {
       setSelectedImage(result.assets[0].uri)
+      setShowAppOptions(true)
     } else {
       alert("you didn't select any image")
     }
@@ -33,10 +36,12 @@ export default function App() {
           selectedImage={selectedImage}
         />
       </View>
-      <View style={styles.footerContiner}>
-        <Button theme="primary" label={"Choose a photo"} onPress={imagePickerAsync}/>
-        <Button label={"Use this photo"}/>
-      </View>
+      {showAppOptions ? (<View/>) : (
+        <View style={styles.footerContiner}>
+          <Button theme="primary" label={"Choose a photo"} onPress={imagePickerAsync}/>
+          <Button label={"Use this photo"} onPress={setShowAppOptions(true)}/>
+        </View>
+      )}
       <StatusBar style="auto" />
     </View>
   );
